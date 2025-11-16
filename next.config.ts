@@ -79,9 +79,8 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
     optimizePackageImports: ['@prisma/client'],
-    // Enable optimized font loading
-    optimizeFonts: true,
   },
+  // NOTE: optimizeFonts removed due to Next.js version deprecation of this option.
 
   // Webpack optimizations
   webpack: (config: any, { dev, isServer }: any) => {
