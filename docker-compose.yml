@@ -32,7 +32,7 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: https://fuel.ashwin.lol
     ports:
       - "9016:3000"
     restart: always
