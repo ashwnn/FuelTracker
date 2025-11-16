@@ -53,7 +53,9 @@ export async function GET(req: NextRequest) {
       }),
       prisma.monthlyBudget.findMany({
         where: { userId: user.id },
-        orderBy: [{ year: 'desc' }, { month: 'desc' }],
+        // monthlyBudget in the Prisma schema doesn't have 'year' or 'month' fields.
+        // Order by creation date instead to export most recent budgets first.
+        orderBy: { createdAt: 'desc' },
       }),
       prisma.apiKey.findMany({
         where: { userId: user.id },
