@@ -205,6 +205,8 @@ code, pre {
   border: 1px solid var(--color-border-base);
 }
 
+/* For mobile-only, see the responsive media query at the bottom of this file. */
+
 .auth-card h1 {
   margin: 0 0 0.5rem;
   font-size: 1.875rem;
@@ -1526,6 +1528,29 @@ tr:last-child td {
 
   .dashboard-content {
     padding: 1rem 0.5rem;
+  }
+
+  /* Mobile-only: make the login & register auth-card full height (full-screen) */
+  .auth-container.register-page,
+  .auth-container.login-page {
+    padding: 0;
+    align-items: stretch; /* enable auth-card to fill height */
+  }
+
+  .auth-container.register-page .auth-card,
+  .auth-container.login-page .auth-card {
+    min-height: 100dvh;
+    height: 100dvh;
+    width: 100%;
+    border-radius: 0;
+    box-shadow: var(--shadow-none);
+    border-left: none;
+    border-right: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 1.25rem;
+    overflow: auto;
   }
 }
 

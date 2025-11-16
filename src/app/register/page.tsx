@@ -52,7 +52,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container register-page">
       <div className="auth-card">
         <h1>FuelTracker</h1>
         <h2>Register</h2>

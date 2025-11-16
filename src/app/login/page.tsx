@@ -36,7 +36,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container login-page">
       <div className="auth-card">
         <h1>FuelTracker</h1>
         <h2>Login</h2>
