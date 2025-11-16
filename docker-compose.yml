@@ -17,6 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - apps
 
   app:
     build: .
@@ -34,6 +36,8 @@ services:
     ports:
       - "9016:3000"
     restart: always
+    networks:
+      - apps
     command: >
       sh -c "
         echo '==================================='
@@ -55,7 +59,12 @@ services:
         echo ''
         echo 'Starting Next.js application...'
         npm start
-      "
+      "      
+
+networks:
+  apps:
+    external: true
 
 volumes:
   db_data:
+    name: fueltrack_data
