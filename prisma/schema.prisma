@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Enumerations
+enum DistanceUnit {
+  KM
+  MILE
+}
+
+enum VolumeUnit {
+  LITER
+  GALLON
+}
+
+enum EconomyUnit {
+  L_PER_100KM
+  MPG
+}
+
+enum EntrySourceType {
+  MANUAL
+  PHOTO_AI
+  API
+}
+
+enum FuelType {
+  REGULAR
+  PREMIUM
+  DIESEL
+  E85
+  OTHER
+}
+
+enum FillLevel {
+  FULL
+  PARTIAL
+}
+
+// User and authentication models
+model User {
+  id                Int           @id @default(autoincrement())
+  email             String        @unique
+  passwordHash      String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  defaultDistanceUnit DistanceUnit @default(KM)
+  defaultVolumeUnit   VolumeUnit   @default(LITER)
+  defaultEconomyUnit  EconomyUnit  @default(L_PER_100KM)
+  defaultCurrency     String       @default("USD")
+
+  vehicles           Vehicle[]
+  entries            FillUpEntry[]
+  apiKeys            ApiKey[]
+  budgets            MonthlyBudget[]
+}
+
+model ApiKey {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  name        String     // "iOS app", "Home server"
+  keyHash     String     // hashed
+  createdAt   DateTime   @default(now())
+  lastUsedAt  DateTime?
+  revokedAt   DateTime?
+  isActive    Boolean    @default(true)
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([keyHash])
+}
+
+model MonthlyBudget {
+  id          Int       @id @default(autoincrement())
+  userId      Int       @unique
+  currency    String    @default("USD")
+  amount      Decimal   @db.Decimal(10, 2)  // monthly budget amount
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Vehicle and fuel tracking models
+model Vehicle {
+  id        Int           @id @default(autoincrement())
+  userId    Int
+  name      String        // "Daily driver", "Motorcycle"
+  make      String?
+  model     String?
+  year      Int?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tanks     TankProfile[]
+  entries   FillUpEntry[]
+
+  @@index([userId])
+}
+
+model TankProfile {
+  id          Int        @id @default(autoincrement())
+  vehicleId   Int
+  name        String     // "Main tank", "Aux tank", "Left", "Right"
+  fuelType    FuelType
+  capacityL   Decimal?   @db.Decimal(8, 2)  // optional tank capacity
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  vehicle     Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  entries     FillUpEntry[]
+
+  @@index([vehicleId])
+}
+
+model FillUpEntry {
+  id           Int           @id @default(autoincrement())
+  userId       Int
+  vehicleId    Int
+  tankId       Int?          // optional, if not specified, vehicle level only
+  entryDate    DateTime      @default(now())
+
+  // Stored in metric units
+  odometerKm   Decimal       @db.Decimal(10, 2) // current odometer in km
+  fuelVolumeL  Decimal       @db.Decimal(8, 3)  // filled volume in liters
+  totalCost    Decimal       @db.Decimal(10, 2)
+  currency     String        @default("USD")
+
+  // Derived unit price
+  pricePerLiter Decimal?     @db.Decimal(10, 4)
+
+  fuelType     FuelType      // actual fuel type used
+  fillLevel    FillLevel     @default(FULL)
+
+  sourceType   EntrySourceType @default(MANUAL)
+  imageUrl     String?       @db.Text
+  aiConfidence Float?
+
+  distanceSinceLastKm Decimal? @db.Decimal(10, 2)
+  economyLPer100Km    Decimal? @db.Decimal(8, 3)
+  economyMpg          Decimal? @db.Decimal(8, 3)
+  costPerKm           Decimal? @db.Decimal(10, 4)
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle      Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  tank         TankProfile?  @relation(fields: [tankId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, entryDate])
+  @@index([userId, entryDate])
+  @@index([tankId])
+}

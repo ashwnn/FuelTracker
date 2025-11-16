@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `FillUpEntry` MODIFY `currency` VARCHAR(191) NOT NULL DEFAULT 'USD';
